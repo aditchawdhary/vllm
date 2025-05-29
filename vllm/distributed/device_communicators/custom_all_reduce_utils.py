@@ -19,6 +19,7 @@ from vllm.distributed.device_communicators.cuda_wrapper import CudaRTLibrary
 from vllm.logger import init_logger
 from vllm.utils import (cuda_device_count_stateless,
                         update_environment_variables)
+from security import safe_command
 
 logger = init_logger(__name__)
 
@@ -222,7 +223,7 @@ def gpu_p2p_access_check(src: int, tgt: int) -> bool:
         with tempfile.NamedTemporaryFile() as output_file:
             input_bytes = pickle.dumps(
                 (batch_src, batch_tgt, output_file.name))
-            returned = subprocess.run([sys.executable, __file__],
+            returned = safe_command.run(subprocess.run, [sys.executable, __file__],
                                       input=input_bytes,
                                       capture_output=True)
             # check if the subprocess is successful

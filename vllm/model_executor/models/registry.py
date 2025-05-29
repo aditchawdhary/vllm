@@ -25,6 +25,7 @@ from .interfaces import (has_inner_state, has_noops, is_attention_free,
                          supports_multimodal, supports_pp,
                          supports_transcription, supports_v0_only)
 from .interfaces_base import is_text_generation_model
+from security import safe_command
 
 logger = init_logger(__name__)
 
@@ -583,7 +584,7 @@ def _run_in_subprocess(fn: Callable[[], _T]) -> _T:
 
         # cannot use `sys.executable __file__` here because the script
         # contains relative imports
-        returned = subprocess.run(_SUBPROCESS_COMMAND,
+        returned = safe_command.run(subprocess.run, _SUBPROCESS_COMMAND,
                                   input=input_bytes,
                                   capture_output=True)
 

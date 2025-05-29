@@ -15,6 +15,7 @@ import sys
 from collections import namedtuple
 
 from vllm.envs import environment_variables
+from security import safe_command
 
 try:
     import torch
@@ -94,7 +95,7 @@ DEFAULT_PIP_PATTERNS = {
 def run(command):
     """Return (return-code, stdout, stderr)."""
     shell = True if type(command) is str else False
-    p = subprocess.Popen(command,
+    p = safe_command.run(subprocess.Popen, command,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE,
                          shell=shell)
