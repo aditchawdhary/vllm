@@ -18,8 +18,7 @@ import os
 import re
 import sys
 from pathlib import Path
-
-import requests
+from security import safe_requests
 
 logger = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -165,7 +164,7 @@ def get_repo_base_and_branch(pr_number):
         return _cached_base, _cached_branch
 
     url = f"https://api.github.com/repos/vllm-project/vllm/pulls/{pr_number}"
-    response = requests.get(url)
+    response = safe_requests.get(url)
     if response.status_code == 200:
         data = response.json()
         _cached_base = data['head']['repo']['full_name']

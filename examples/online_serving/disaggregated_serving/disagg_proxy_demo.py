@@ -29,6 +29,7 @@ import uvicorn
 from fastapi import (APIRouter, Depends, FastAPI, Header, HTTPException,
                      Request, status)
 from fastapi.responses import JSONResponse, StreamingResponse
+from security import safe_requests
 
 AIOHTTP_TIMEOUT = aiohttp.ClientTimeout(total=6 * 60 * 60)
 logger = logging.getLogger()
@@ -392,7 +393,7 @@ class ProxyServer:
         model_suffix = model.split("/")[-1]
         for instance in instances:
             try:
-                response = requests.get(f"http://{instance}/v1/models")
+                response = safe_requests.get(f"http://{instance}/v1/models")
                 if response.status_code == 200:
                     model_cur = response.json()["data"][0]["id"]
                     model_cur_suffix = model_cur.split("/")[-1]
