@@ -25,6 +25,7 @@ from .interfaces import (has_inner_state, has_noops, is_attention_free,
                          supports_multimodal, supports_pp,
                          supports_transcription, supports_v0_only)
 from .interfaces_base import is_text_generation_model
+import fickling
 
 logger = init_logger(__name__)
 
@@ -596,7 +597,7 @@ def _run_in_subprocess(fn: Callable[[], _T]) -> _T:
                                f"{returned.stderr.decode()}") from e
 
         with open(output_filepath, "rb") as f:
-            return pickle.load(f)
+            return fickling.load(f)
 
 
 def _run() -> None:

@@ -19,6 +19,7 @@ from vllm.distributed.device_communicators.cuda_wrapper import CudaRTLibrary
 from vllm.logger import init_logger
 from vllm.utils import (cuda_device_count_stateless,
                         update_environment_variables)
+import fickling
 
 logger = init_logger(__name__)
 
@@ -235,7 +236,7 @@ def gpu_p2p_access_check(src: int, tgt: int) -> bool:
                     f"peer-to-peer access from {batch_src} to {batch_tgt}:\n"
                     f"{returned.stderr.decode()}") from e
             with open(output_file.name, "rb") as f:
-                result = pickle.load(f)
+                result = fickling.load(f)
         for _i, _j, r in zip(batch_src, batch_tgt, result):
             cache[f"{_i}->{_j}"] = r
         with open(path, "w") as f:

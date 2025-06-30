@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import math
-import pickle
 import re
 from collections import defaultdict
 
@@ -11,6 +10,7 @@ import seaborn as sns
 from torch.utils.benchmark import Measurement as TMeasurement
 
 from vllm.utils import FlexibleArgumentParser
+import fickling
 
 if __name__ == "__main__":
     parser = FlexibleArgumentParser(
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with open(args.filename, "rb") as f:
-        data = pickle.load(f)
+        data = fickling.load(f)
         raw_results: list[TMeasurement] = data["results"]
 
     results = defaultdict(lambda: list())
