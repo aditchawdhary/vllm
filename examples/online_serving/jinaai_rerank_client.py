@@ -26,7 +26,7 @@ data = {
 
 
 def main():
-    response = requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data, timeout=60)
 
     # Check the response
     if response.status_code == 200:

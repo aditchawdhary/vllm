@@ -34,7 +34,7 @@ def http_bot(prompt):
     response = requests.post(args.model_url,
                              headers=headers,
                              json=pload,
-                             stream=True)
+                             stream=True, timeout=60)
 
     for chunk in response.iter_lines(chunk_size=8192,
                                      decode_unicode=False,
