@@ -165,7 +165,7 @@ def get_repo_base_and_branch(pr_number):
         return _cached_base, _cached_branch
 
     url = f"https://api.github.com/repos/vllm-project/vllm/pulls/{pr_number}"
-    response = requests.get(url)
+    response = requests.get(url, timeout=60)
     if response.status_code == 200:
         data = response.json()
         _cached_base = data['head']['repo']['full_name']

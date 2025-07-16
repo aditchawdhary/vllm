@@ -12,7 +12,7 @@ import requests
 
 def post_http_request(prompt: dict, api_url: str) -> requests.Response:
     headers = {"User-Agent": "Test Client"}
-    response = requests.post(api_url, headers=headers, json=prompt)
+    response = requests.post(api_url, headers=headers, json=prompt, timeout=60)
     return response
 
 

@@ -38,7 +38,7 @@ def post_http_request(prompt: str,
     response = requests.post(api_url,
                              headers=headers,
                              json=pload,
-                             stream=stream)
+                             stream=stream, timeout=60)
     return response
 
 

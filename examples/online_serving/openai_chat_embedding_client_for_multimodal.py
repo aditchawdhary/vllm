@@ -35,7 +35,7 @@ def vlm2vec():
             "encoding_format":
             "float",
         },
-    )
+    timeout=60)
     response.raise_for_status()
     response_json = response.json()
 
@@ -91,7 +91,7 @@ def dse_qwen2_vl(inp: dict):
             "messages": messages,
             "encoding_format": "float",
         },
-    )
+    timeout=60)
     response.raise_for_status()
     response_json = response.json()
 

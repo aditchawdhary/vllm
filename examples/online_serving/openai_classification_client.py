@@ -8,7 +8,7 @@ import requests
 
 def post_http_request(payload: dict, api_url: str) -> requests.Response:
     headers = {"User-Agent": "Test Client"}
-    response = requests.post(api_url, headers=headers, json=payload)
+    response = requests.post(api_url, headers=headers, json=payload, timeout=60)
     return response
 
 
