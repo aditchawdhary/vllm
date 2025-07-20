@@ -64,8 +64,8 @@ class KVCacheSpec:
         Merge a list of KVCacheSpec objects into a single KVCacheSpec object.
         """
         assert all(spec.type_id == specs[0].type_id for spec in specs[1:]), (
-            "All layers in the same KV cache group must share the same "
-            "type_id.")
+            "All layers in the same KV cache group must share the same type_id."
+        )
         return copy.deepcopy(specs[0])
 
 
@@ -80,13 +80,19 @@ class AttentionSpec(KVCacheSpec):
     def page_size_bytes(self) -> int:
         # For MLA we only store a single latent vector
         coef = 1 if self.use_mla else 2
-        return coef * self.block_size * self.num_kv_heads * self.head_size \
-                * get_dtype_size(self.dtype)
+        return (
+            coef
+            * self.block_size
+            * self.num_kv_heads
+            * self.head_size
+            * get_dtype_size(self.dtype)
+        )
 
 
 @dataclass
 class FullAttentionSpec(AttentionSpec):
     sliding_window: Optional[int] = None
+    attention_chunk_size: Optional[int] = None
     """
     When hybrid allocator is disabled and the model contains both full 
     attention layers and sliding window attention layers, sliding 
@@ -106,22 +112,44 @@ class FullAttentionSpec(AttentionSpec):
         return cdiv(max_model_len, self.block_size) * self.page_size_bytes
 
     @classmethod
+    def merge_window_sizes(cls, window_sizes: set[int]) -> Optional[int]:
+        if len(window_sizes) == 0:
+            return None
+        elif len(window_sizes) == 1:
+            return window_sizes.pop()
+        else:
+            raise ValueError(
+                "All attention layers in the same KV cache group must have the"
+                "same window size."
+            )
+
+    @classmethod
     def merge(cls, specs: list[Self]) -> Self:
         """
-        Merge a list of FullAttentionSpec objects into a single 
+        Merge a list of FullAttentionSpec objects into a single
         FullAttentionSpec object.
         """
         merged_spec = super().merge(specs)
-        sliding_window = set(spec.sliding_window for spec in specs
-                             if spec.sliding_window is not None)
-        if len(sliding_window) == 0:
-            merged_spec.sliding_window = None
-        elif len(sliding_window) == 1:
-            merged_spec.sliding_window = sliding_window.pop()
-        else:
-            raise ValueError(
-                "All sliding window layers in the same KV cache group "
-                "must have the same window size.")
+        sliding_window = set(
+            spec.sliding_window
+            for spec in specs
+            if spec.sliding_window is not None
+        )
+        attention_chunk_size = set(
+            spec.attention_chunk_size
+            for spec in specs
+            if spec.attention_chunk_size is not None
+        )
+        merged_spec.sliding_window = cls.merge_window_sizes(sliding_window)
+        merged_spec.attention_chunk_size = cls.merge_window_sizes(
+            attention_chunk_size
+        )
+        assert (merged_spec.sliding_window is not None) + (
+            merged_spec.attention_chunk_size is not None
+        ) <= 1, (
+            "Model with both sliding window layers and chunked local attention"
+            "layers is not supported."
+        )
         return merged_spec
 
 
@@ -129,15 +157,26 @@ class FullAttentionSpec(AttentionSpec):
 class ChunkedLocalAttentionSpec(AttentionSpec):
     attention_chunk_size: int
 
-    def max_memory_usage_bytes(self, vllm_config: VllmConfig) -> int:
-        max_model_len = vllm_config.model_config.max_model_len
-        return cdiv(max_model_len, self.block_size) * self.page_size_bytes
-
     @property
     def type_id(self) -> str:
         return (
             f"local_attention_{self.attention_chunk_size}_{self.block_size}_{self.page_size_bytes}"
         )  # noqa
+
+    def max_memory_usage_bytes(self, vllm_config: VllmConfig) -> int:
+        max_model_len = vllm_config.model_config.max_model_len
+        max_num_batched_tokens = (
+            vllm_config.scheduler_config.max_num_batched_tokens
+        )
+
+        # During chunked prefill, we allocate KV cache for at most
+        # `self.attention_chunk_size` computed tokens plus the newly scheduled
+        # tokens. And we won't allocate KV cache for more than `max_model_len`
+        # tokens.
+        num_tokens = min(
+            self.attention_chunk_size + max_num_batched_tokens, max_model_len
+        )
+        return cdiv(num_tokens, self.block_size) * self.page_size_bytes
 
 
 @dataclass
@@ -154,14 +193,16 @@ class SlidingWindowSpec(AttentionSpec):
     def max_memory_usage_bytes(self, vllm_config: VllmConfig) -> int:
         max_model_len = vllm_config.model_config.max_model_len
         max_num_batched_tokens = (
-            vllm_config.scheduler_config.max_num_batched_tokens)
+            vllm_config.scheduler_config.max_num_batched_tokens
+        )
 
         # During chunked prefill, we allocate KV cache for the last
         # `self.sliding_window-1` computed tokens plus the newly scheduled
         # tokens. And we won't allocate KV cache for more than `max_model_len`
         # tokens.
-        num_tokens = min(self.sliding_window - 1 + max_num_batched_tokens,
-                         max_model_len)
+        num_tokens = min(
+            self.sliding_window - 1 + max_num_batched_tokens, max_model_len
+        )
 
         # +1 here because the sliding window may not start from the beginning
         # of the block. For example, if the block size is 4 and num_token
@@ -203,6 +244,7 @@ class KVCacheTensor:
     """
     A class for specifying how the workers should initialize the KV cache.
     """
+
     size: int  # size of the KV cache tensor in bytes
     shared_by: list[str]  # layer names that share the same KV cache tensor
 
@@ -213,6 +255,7 @@ class KVCacheGroupSpec:
     Represents a group of model layers that share the same KV cache block table.
     These layers are regarded as one layer in the KV cache manager.
     """
+
     # The names of model layers in this group
     layer_names: list[str]
     # The KV cache spec of this manager layer
@@ -224,6 +267,7 @@ class KVCacheConfig:
     """
     The KV cache configuration of a model.
     """
+
     """The number of KV cache blocks"""
     num_blocks: int
     """How should model runner initialize the KV cache tensors for each layer"""
