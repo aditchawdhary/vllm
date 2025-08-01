@@ -5,7 +5,6 @@
 import argparse
 import dataclasses
 import json
-import random
 import time
 from typing import Optional
 
@@ -13,11 +12,12 @@ from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from vllm.engine.arg_utils import EngineArgs
 from vllm.utils import FlexibleArgumentParser
+import secrets
 
 
 # Select a equi-probable random priority
 def get_random_flag():
-    return 0 if random.random() < 0.5 else 1
+    return 0 if secrets.SystemRandom().random() < 0.5 else 1
 
 
 def sample_requests(
@@ -41,7 +41,7 @@ def sample_requests(
     ]
 
     # Shuffle the dataset.
-    random.shuffle(dataset)
+    secrets.SystemRandom().shuffle(dataset)
 
     # Filter out sequences that are too long or too short
     filtered_dataset: list[tuple[str, int, int]] = []
@@ -116,7 +116,7 @@ def run_vllm(
 
 def main(args: argparse.Namespace):
     print(args)
-    random.seed(args.seed)
+    secrets.SystemRandom().seed(args.seed)
 
     # Sample the requests.
     tokenizer = AutoTokenizer.from_pretrained(

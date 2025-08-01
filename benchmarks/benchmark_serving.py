@@ -27,7 +27,6 @@ import asyncio
 import gc
 import json
 import os
-import random
 import time
 import warnings
 from collections.abc import AsyncGenerator, Iterable
@@ -45,6 +44,7 @@ from backend_request_func import (
     RequestFuncInput,
     RequestFuncOutput,
 )
+import secrets
 
 try:
     from vllm.transformers_utils.tokenizer import get_tokenizer
@@ -383,7 +383,7 @@ async def benchmark(
     if lora_modules:
         # For each input request, choose a LoRA module at random.
         lora_modules = iter(
-            [random.choice(lora_modules) for _ in range(len(input_requests))]
+            [secrets.choice(lora_modules) for _ in range(len(input_requests))]
         )
 
     if profile:
@@ -689,7 +689,7 @@ def save_to_pytorch_benchmark_format(
 
 def main(args: argparse.Namespace):
     print(args)
-    random.seed(args.seed)
+    secrets.SystemRandom().seed(args.seed)
     np.random.seed(args.seed)
 
     backend = args.backend

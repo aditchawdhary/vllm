@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
 """Utility functions used for tests and benchmarks"""
 
-import random
-
 import numpy
 import torch
 
@@ -11,6 +9,7 @@ from vllm.scalar_type import ScalarType
 
 from .marlin_utils_test import marlin_weights
 from .quant_utils import gptq_quantize_weights
+import secrets
 
 
 # This is PyTorch implementation of main part of reorder_meta()
@@ -333,7 +332,7 @@ def check_24(w, num_rows_to_sample=50, _verbose=False):
     print("check_24: w.shape = {}".format(w.shape))
 
     num_rows, num_cols = w.shape
-    sampled_row_idxs = random.choices(range(num_rows), k=num_rows_to_sample)
+    sampled_row_idxs = secrets.SystemRandom().choices(range(num_rows), k=num_rows_to_sample)
     if _verbose:
         print(f"Sampled row idxs = {sampled_row_idxs}")
 

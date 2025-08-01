@@ -9,7 +9,6 @@ on HuggingFace model repository.
 """
 
 import os
-import random
 from contextlib import contextmanager
 from dataclasses import asdict
 from typing import NamedTuple, Optional
@@ -23,6 +22,7 @@ from vllm.assets.video import VideoAsset
 from vllm.lora.request import LoRARequest
 from vllm.multimodal.image import convert_image_mode
 from vllm.utils import FlexibleArgumentParser
+import secrets
 
 
 class ModelRequestData(NamedTuple):
@@ -1307,7 +1307,7 @@ def apply_image_repeat(
     cur_image = data
     for i in range(num_prompts):
         if image_repeat_prob is not None:
-            res = random.choices(no_yes, probs)[0]
+            res = secrets.SystemRandom().choices(no_yes, probs)[0]
             if res == 0:
                 # No repeat => Modify one pixel
                 cur_image = cur_image.copy()

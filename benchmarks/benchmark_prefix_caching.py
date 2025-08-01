@@ -30,7 +30,6 @@ ShareGPT example usage:
 
 import dataclasses
 import json
-import random
 import time
 from typing import Optional
 
@@ -39,6 +38,7 @@ from transformers import PreTrainedTokenizerBase
 from vllm import LLM, SamplingParams
 from vllm.engine.arg_utils import EngineArgs
 from vllm.utils import FlexibleArgumentParser
+import secrets
 
 try:
     from vllm.transformers_utils.tokenizer import get_tokenizer
@@ -69,8 +69,7 @@ def sample_tokens(tokenizer: PreTrainedTokenizerBase, length: int) -> list[int]:
     all_special_ids = set(tokenizer.all_special_ids)
 
     # Remove the special tokens.
-    return random.choices(
-        [v for k, v in vocab.items() if k not in all_special_ids],
+    return secrets.SystemRandom().choices([v for k, v in vocab.items() if k not in all_special_ids],
         k=length,
     )
 
@@ -97,7 +96,7 @@ def sample_requests_from_dataset(
     ]
 
     # Shuffle the dataset.
-    random.shuffle(dataset)
+    secrets.SystemRandom().shuffle(dataset)
 
     min_len, max_len = input_length_range
     assert min_len >= 0 and max_len >= min_len, "input_length_range too small"
@@ -137,7 +136,7 @@ def sample_requests_from_random(
 
     for i in range(num_requests):
         unique_part_token_ids = sample_tokens(
-            tokenizer, random.randint(min_len - prefix_len, max_len - prefix_len)
+            tokenizer, secrets.SystemRandom().randint(min_len - prefix_len, max_len - prefix_len)
         )
         prompt_token_ids = prefix_token_ids + unique_part_token_ids
         prompt = tokenizer.decode(prompt_token_ids)
@@ -156,14 +155,14 @@ def repeat_and_sort_requests(
     if sort:
         repeated_requests.sort(key=lambda x: x[1])
     else:
-        random.shuffle(repeated_requests)
+        secrets.SystemRandom().shuffle(repeated_requests)
     return [req.prompt for req in repeated_requests]
 
 
 def main(args):
     tokenizer = get_tokenizer(args.model, trust_remote_code=True)
     input_length_range = tuple(map(int, args.input_length_range.split(":")))
-    random.seed(args.seed)
+    secrets.SystemRandom().seed(args.seed)
     if args.dataset_path is not None:
         if args.prefix_len > 0:
             raise ValueError(
