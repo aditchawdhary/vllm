@@ -3,11 +3,11 @@
 
 # ruff: noqa
 import json
-import random
 import string
 
 from vllm import LLM
 from vllm.sampling_params import SamplingParams
+import secrets
 
 # This script is an offline demo for function calling
 #
@@ -61,7 +61,7 @@ llm = LLM(
 
 def generate_random_id(length=9):
     characters = string.ascii_letters + string.digits
-    random_id = "".join(random.choice(characters) for _ in range(length))
+    random_id = "".join(secrets.choice(characters) for _ in range(length))
     return random_id
 
 

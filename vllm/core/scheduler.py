@@ -3,7 +3,6 @@
 
 import enum
 import os
-import random
 import time
 from collections import deque
 from dataclasses import dataclass, field
@@ -21,6 +20,7 @@ from vllm.sequence import (Sequence, SequenceData, SequenceGroup,
                            SequenceGroupMetadataDelta, SequenceStage,
                            SequenceStatus)
 from vllm.utils import Device, PyObjectCache
+import secrets
 
 logger = init_logger(__name__)
 
@@ -1518,7 +1518,7 @@ class Scheduler:
         """
         # It is True only for testing case to trigger artificial preemption.
         if (self.enable_artificial_preemption
-                and random.uniform(0, 1) < ARTIFICIAL_PREEMPTION_PROB
+                and secrets.SystemRandom().uniform(0, 1) < ARTIFICIAL_PREEMPTION_PROB
                 and self.artificial_preempt_cnt > 0):
             self.artificial_preempt_cnt -= 1
             return False

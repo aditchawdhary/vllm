@@ -7,9 +7,9 @@ Main article: https://docs.vllm.ai/en/latest/usage/reproducibility.html
 """
 
 import os
-import random
 
 from vllm import LLM, SamplingParams
+import secrets
 
 # V1 only: Turn off multiprocessing to make the scheduling deterministic.
 os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
@@ -40,7 +40,7 @@ def main():
     # Try generating random numbers outside vLLM
     # The same number is output across runs, meaning that the random state
     # in the user code has been updated by vLLM
-    print(random.randint(0, 100))
+    print(secrets.SystemRandom().randint(0, 100))
 
 
 if __name__ == "__main__":

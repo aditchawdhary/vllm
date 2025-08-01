@@ -41,12 +41,12 @@ details.
 """
 
 import dataclasses
-import random
 import time
 
 from vllm import LLM, SamplingParams
 from vllm.engine.arg_utils import EngineArgs
 from vllm.utils import FlexibleArgumentParser
+import secrets
 
 
 def test_long_document_qa(llm=None, sampling_params=None, prompts=None):
@@ -89,7 +89,7 @@ def repeat_prompts(prompts, repeat_count, mode: str):
     print("Repeat mode: ", mode)
     if mode == "random":
         repeated_prompts = prompts * repeat_count
-        random.shuffle(repeated_prompts)
+        secrets.SystemRandom().shuffle(repeated_prompts)
         return repeated_prompts
     elif mode == "tile":
         return prompts * repeat_count
@@ -105,7 +105,7 @@ def repeat_prompts(prompts, repeat_count, mode: str):
 
 
 def main(args):
-    random.seed(args.shuffle_seed)
+    secrets.SystemRandom().seed(args.shuffle_seed)
 
     # Prepare the prompts:
     # we append the document id at the beginning to avoid any of the document

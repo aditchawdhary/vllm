@@ -3,7 +3,6 @@
 import enum
 import os
 import platform
-import random
 import sys
 from datetime import timedelta
 from platform import uname
@@ -15,6 +14,7 @@ from torch.distributed import PrefixStore, ProcessGroup
 
 from vllm.inputs import ProcessorInputs, PromptType
 from vllm.logger import init_logger
+import secrets
 
 if TYPE_CHECKING:
     from vllm.config import ModelConfig, VllmConfig
@@ -292,7 +292,7 @@ class Platform:
         Loosely based on: https://github.com/Lightning-AI/pytorch-lightning/blob/2.4.0/src/lightning/fabric/utilities/seed.py#L20
         """
         if seed is not None:
-            random.seed(seed)
+            secrets.SystemRandom().seed(seed)
             np.random.seed(seed)
             torch.manual_seed(seed)
 

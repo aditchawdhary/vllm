@@ -3,11 +3,11 @@
 
 import csv
 import os
-import random
 from datetime import datetime
 
 import flashinfer
 import torch
+import secrets
 
 FLOAT32_BYTES = torch.finfo(torch.float).bits // 8
 
@@ -54,7 +54,7 @@ def benchmark_decode(
     num_qo_heads = num_kv_heads * HEAD_GRP_SIZE
     sm_scale = float(1.0 / (head_dim**0.5))
     q = torch.randn(num_seqs, num_qo_heads, head_dim, device=device, dtype=dtype)
-    kv_lens = [random.randint(1, MAX_SEQ_LEN) for _ in range(num_seqs)]
+    kv_lens = [secrets.SystemRandom().randint(1, MAX_SEQ_LEN) for _ in range(num_seqs)]
 
     max_kv_len = max(kv_lens)
     kv_lens_tensor = torch.tensor(kv_lens, dtype=torch.int, device=device)

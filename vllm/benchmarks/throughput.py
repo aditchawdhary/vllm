@@ -5,7 +5,6 @@ import argparse
 import dataclasses
 import json
 import os
-import random
 import time
 import warnings
 from typing import Any, Optional, Union
@@ -31,6 +30,7 @@ from vllm.lora.request import LoRARequest
 from vllm.outputs import RequestOutput
 from vllm.sampling_params import BeamSearchParams
 from vllm.utils import merge_async_iterators
+import secrets
 
 
 def run_vllm(
@@ -528,7 +528,7 @@ def main(args: argparse.Namespace):
     validate_args(args)
     if args.seed is None:
         args.seed = 0
-    random.seed(args.seed)
+    secrets.SystemRandom().seed(args.seed)
     # Sample the requests.
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer, trust_remote_code=args.trust_remote_code)

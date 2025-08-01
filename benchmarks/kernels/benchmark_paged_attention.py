@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
 
-import random
 import time
 from typing import Optional
 
@@ -15,6 +14,7 @@ from vllm.utils import (
     FlexibleArgumentParser,
     create_kv_caches_with_random,
 )
+import secrets
 
 logger = init_logger(__name__)
 
@@ -61,7 +61,7 @@ def main(
     block_tables_lst: list[list[int]] = []
     for _ in range(num_seqs):
         block_table = [
-            random.randint(0, NUM_BLOCKS - 1) for _ in range(max_num_blocks_per_seq)
+            secrets.SystemRandom().randint(0, NUM_BLOCKS - 1) for _ in range(max_num_blocks_per_seq)
         ]
         block_tables_lst.append(block_table)
 

@@ -26,7 +26,6 @@ import copy
 import dataclasses
 import json
 import os
-import random
 import time
 import uuid
 import warnings
@@ -45,6 +44,7 @@ from backend_request_func import (
     RequestFuncInput,
     RequestFuncOutput,
 )
+import secrets
 
 try:
     from vllm.transformers_utils.tokenizer import get_tokenizer
@@ -453,8 +453,7 @@ async def benchmark(
         return extra_body
 
     print("Starting initial single prompt test run...")
-    structured_output_req_idx = random.sample(
-        range(len(input_requests)), int(len(input_requests) * structured_output_ratio)
+    structured_output_req_idx = secrets.SystemRandom().sample(range(len(input_requests)), int(len(input_requests) * structured_output_ratio)
     )
 
     test_request = input_requests[0]
@@ -755,7 +754,7 @@ def check_goodput_args(args):
 
 def main(args: argparse.Namespace):
     print(args)
-    random.seed(args.seed)
+    secrets.SystemRandom().seed(args.seed)
     np.random.seed(args.seed)
 
     backend = args.backend

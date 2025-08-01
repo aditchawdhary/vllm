@@ -20,7 +20,6 @@ import asyncio
 import gc
 import json
 import os
-import random
 import time
 import warnings
 from collections.abc import AsyncGenerator, Iterable
@@ -41,6 +40,7 @@ from vllm.benchmarks.endpoint_request_func import (ASYNC_REQUEST_FUNCS,
 from vllm.benchmarks.utils import (convert_to_pytorch_benchmark_format,
                                    write_to_json)
 from vllm.transformers_utils.tokenizer import get_tokenizer
+import secrets
 
 MILLISECONDS_TO_SECONDS_CONVERSION = 1000
 
@@ -370,7 +370,7 @@ async def benchmark(
     if lora_modules:
         # For each input request, choose a LoRA module at random.
         lora_modules = iter(
-            [random.choice(lora_modules) for _ in range(len(input_requests))])
+            [secrets.choice(lora_modules) for _ in range(len(input_requests))])
 
     if profile:
         print("Starting profiler...")
@@ -906,7 +906,7 @@ def add_cli_args(parser: argparse.ArgumentParser):
 
 def main(args: argparse.Namespace):
     print(args)
-    random.seed(args.seed)
+    secrets.SystemRandom().seed(args.seed)
     np.random.seed(args.seed)
 
     # Validate ramp-up arguments

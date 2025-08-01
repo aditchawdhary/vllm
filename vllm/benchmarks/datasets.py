@@ -15,7 +15,6 @@ import base64
 import io
 import json
 import logging
-import random
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -33,6 +32,7 @@ from vllm.multimodal import MultiModalDataDict
 from vllm.multimodal.image import convert_image_mode
 from vllm.transformers_utils.tokenizer import AnyTokenizer, get_lora_tokenizer
 from vllm.utils import PlaceholderModule
+import secrets
 
 try:
     from datasets import load_dataset
@@ -166,7 +166,7 @@ class BenchmarkDataset(ABC):
             return None, tokenizer
 
         # Generate a random LoRA ID in the range [1, max_loras].
-        lora_id = random.randint(1, max_loras)
+        lora_id = secrets.SystemRandom().randint(1, max_loras)
         lora_request = LoRARequest(
             lora_name=str(lora_id),
             lora_int_id=lora_id,
@@ -210,8 +210,8 @@ class BenchmarkDataset(ABC):
             num_requests (int): The target number of requests.
         """
         if len(requests) < num_requests:
-            random.seed(self.random_seed)
-            additional = random.choices(requests,
+            secrets.SystemRandom().seed(self.random_seed)
+            additional = secrets.SystemRandom().choices(requests,
                                         k=num_requests - len(requests))
             requests.extend(additional)
             logger.info("Oversampled requests to reach %d total samples.",
@@ -320,7 +320,7 @@ class RandomDataset(BenchmarkDataset):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        random.seed(self.random_seed)
+        secrets.SystemRandom().seed(self.random_seed)
         np.random.seed(self.random_seed)
 
     def sample(
@@ -418,8 +418,8 @@ class ShareGPTDataset(BenchmarkDataset):
             entry for entry in self.data
             if "conversations" in entry and len(entry["conversations"]) >= 2
         ]
-        random.seed(self.random_seed)
-        random.shuffle(self.data)
+        secrets.SystemRandom().seed(self.random_seed)
+        secrets.SystemRandom().shuffle(self.data)
 
     def sample(
         self,
@@ -773,8 +773,8 @@ class CustomDataset(BenchmarkDataset):
             raise NotImplementedError(
                 "Only JSONL format is supported for CustomDataset.")
 
-        random.seed(self.random_seed)
-        random.shuffle(self.data)
+        secrets.SystemRandom().seed(self.random_seed)
+        secrets.SystemRandom().shuffle(self.data)
 
     def sample(
         self,
@@ -879,7 +879,7 @@ class SonnetDataset(BenchmarkDataset):
 
         samples = []
         while len(samples) < num_requests:
-            extra_lines = random.choices(self.data,
+            extra_lines = secrets.SystemRandom().choices(self.data,
                                          k=num_input_lines - num_prefix_lines)
             prompt = f"{base_prompt}{''.join(prefix_lines + extra_lines)}"
             msg = [{"role": "user", "content": prompt}]

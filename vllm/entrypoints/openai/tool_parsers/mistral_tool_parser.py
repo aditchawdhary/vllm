@@ -3,7 +3,6 @@
 
 import json
 from collections.abc import Sequence
-from random import choices
 from string import ascii_letters, digits
 from typing import Union
 
@@ -23,6 +22,7 @@ from vllm.entrypoints.openai.tool_parsers.utils import (
     extract_intermediate_diff)
 from vllm.logger import init_logger
 from vllm.transformers_utils.tokenizer import AnyTokenizer, MistralTokenizer
+import secrets
 
 logger = init_logger(__name__)
 
@@ -37,7 +37,7 @@ class MistralToolCall(ToolCall):
     def generate_random_id():
         # Mistral Tool Call Ids must be alphanumeric with a length of 9.
         # https://github.com/mistralai/mistral-common/blob/21ee9f6cee3441e9bb1e6ed2d10173f90bd9b94b/src/mistral_common/protocol/instruct/validator.py#L299
-        return "".join(choices(ALPHANUMERIC, k=9))
+        return "".join(secrets.SystemRandom().choices(ALPHANUMERIC, k=9))
 
     @staticmethod
     def is_valid_id(id: str) -> bool:
