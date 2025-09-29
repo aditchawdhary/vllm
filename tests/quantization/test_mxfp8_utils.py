@@ -244,6 +244,70 @@ class TestMxfp8Quantize:
         )
 
         with patch.dict('sys.modules', {'flashinfer': mock_flashinfer}):
+
+    def test_mxfp8_quantize_nan_values(self):
+        """Test quantization with tensor containing NaN values."""
+        mock_quantize_func = MagicMock()
+        mock_flashinfer = MagicMock()
+        mock_flashinfer.mxfp8_quantize = mock_quantize_func
+
+        nan_tensor = torch.tensor([[float('nan'), 1.0], [2.0, float('nan')]])
+        mock_quantize_func.return_value = (
+            torch.tensor([[0.0, 1.0], [2.0, 0.0]], dtype=torch.float8_e4m3fn),
+            torch.tensor([[1.0], [1.0]], dtype=torch.float32)
+        )
+
+        with patch.dict('sys.modules', {'flashinfer': mock_flashinfer}):
+            result = mxfp8_quantize(nan_tensor)
+            assert isinstance(result, tuple)
+            assert len(result) == 2
+            mock_quantize_func.assert_called_with(
+                nan_tensor, is_sf_swizzled_layout=False
+            )
+
+    def test_mxfp8_quantize_1d_tensor(self):
+        """Test quantization with 1D tensor."""
+        mock_quantize_func = MagicMock()
+        mock_flashinfer = MagicMock()
+        mock_flashinfer.mxfp8_quantize = mock_quantize_func
+
+        tensor_1d = torch.randn(8)
+        mock_quantize_func.return_value = (
+            torch.randn(8, dtype=torch.float8_e4m3fn),
+            torch.randn(1, dtype=torch.float32)
+        )
+
+        with patch.dict('sys.modules', {'flashinfer': mock_flashinfer}):
+            result = mxfp8_quantize(tensor_1d)
+            assert isinstance(result, tuple)
+            assert len(result) == 2
+            mock_quantize_func.assert_called_with(
+                tensor_1d, is_sf_swizzled_layout=False
+            )
+
+    def test_mxfp8_quantize_high_dimensional_tensor(self):
+        """Test quantization with high-dimensional tensor."""
+        mock_quantize_func = MagicMock()
+        mock_flashinfer = MagicMock()
+        mock_flashinfer.mxfp8_quantize = mock_quantize_func
+
+        tensor_5d = torch.randn(2, 3, 4, 5, 6)
+        mock_quantize_func.return_value = (
+            torch.randn(2, 3, 4, 5, 6, dtype=torch.float8_e4m3fn),
+            torch.randn(2, 1, 1, 1, 1, dtype=torch.float32)
+        )
+
+        with patch.dict('sys.modules', {'flashinfer': mock_flashinfer}):
+            result = mxfp8_quantize(tensor_5d)
+            assert isinstance(result, tuple)
+            assert len(result) == 2
+            mock_quantize_func.assert_called_with(
+                tensor_5d, is_sf_swizzled_layout=False
+            )
+
+    def test_mxfp8_quantize_function_call_count(self, sample_tensor):
+        """Test that flashinfer.mxfp8_quantize is called exactly once per call."""
+        mock_quantize_func = MagicMock()
             result = mxfp8_quantize(empty_tensor)
             assert isinstance(result, tuple)
             assert len(result) == 2
