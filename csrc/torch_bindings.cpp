@@ -428,6 +428,10 @@ TORCH_LIBRARY_EXPAND(TORCH_EXTENSION_NAME, ops) {
   ops.def("cutlass_group_gemm_supported(int cuda_device_capability) -> bool");
   ops.impl("cutlass_group_gemm_supported", &cutlass_group_gemm_supported);
 
+  // Get SM version number for the current CUDA device
+  ops.def("get_sm_version_num() -> int");
+  ops.impl("get_sm_version_num", torch::kCUDA, &get_sm_version_num);
+
   // CUTLASS w8a8 grouped GEMM
   ops.def(
       "cutlass_moe_mm(Tensor! out_tensors, Tensor a_tensors, Tensor b_tensors, "
