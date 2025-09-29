@@ -8,6 +8,8 @@ from vllm.ray.lazy_utils import is_in_ray_actor, is_ray_initialized
 
 import pytest
 
+pytestmark = pytest.mark.skip_global_cleanup
+
 
 class TestIsRayInitialized:
     """Test cases for is_ray_initialized function."""
