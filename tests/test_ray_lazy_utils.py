@@ -8,6 +8,7 @@ from vllm.ray.lazy_utils import is_in_ray_actor, is_ray_initialized
 
 import pytest
 
+# Mark all tests in this module to skip global cleanup for faster execution
 pytestmark = pytest.mark.skip_global_cleanup
 
 
