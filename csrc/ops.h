@@ -5,6 +5,7 @@
 
 #include "core/scalar_type.hpp"
 
+#include "core/batch_invariant.hpp"
 #include <vector>
 
 torch::Tensor weak_ref_tensor(torch::Tensor& tensor) {
@@ -365,3 +366,6 @@ void qr_all_reduce(fptr_t _fa, torch::Tensor& inp, torch::Tensor& out,
                    int64_t quant_level, bool cast_bf2half = false);
 int64_t qr_max_size();
 #endif
+// Batch invariant utilities
+bool vllm_kernel_override_batch_invariant_cpp();
+
