@@ -1,5 +1,30 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+"""
+Comprehensive unit tests for vllm/ray/lazy_utils.py
+
+This test suite provides 100% coverage for the lazy_utils module, testing:
+
+Functions tested:
+- is_ray_initialized(): Checks if Ray is initialized
+- is_in_ray_actor(): Checks if we are in a Ray actor
+
+Test coverage includes:
+- Happy path scenarios (Ray available and working)
+- Error cases (Ray not available, ImportError)
+- Edge cases (partial Ray availability, missing attributes)
+- Corner cases (concurrent calls, memory cleanup)
+- Integration scenarios (combining both functions)
+- Various return value types (None, truthy/falsy values)
+- Exception handling (RuntimeError, AttributeError)
+
+The tests use mocking to avoid requiring actual Ray installation and to
+simulate various error conditions that would be difficult to reproduce
+in a real environment.
+
+All tests are marked with skip_global_cleanup for faster execution since
+they don't require GPU initialization.
+"""
 
 import sys
 from unittest.mock import MagicMock, patch
