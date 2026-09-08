@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
-
 """
 Comprehensive unit tests for vllm/ray/lazy_utils.py
 
@@ -25,9 +24,9 @@ in a real environment.
 import sys
 from unittest.mock import MagicMock, patch
 
-from vllm.ray.lazy_utils import is_in_ray_actor, is_ray_initialized
-
 import pytest
+
+from vllm.ray.lazy_utils import is_in_ray_actor, is_ray_initialized
 
 # Mark all tests in this module to skip global cleanup for faster execution
 pytestmark = pytest.mark.skip_global_cleanup
@@ -64,9 +63,10 @@ class TestIsRayInitialized:
             del sys.modules['ray']
 
         # Mock the import to raise ImportError
-        with patch.dict('sys.modules', {'ray': None}):
-            with patch('builtins.__import__', side_effect=ImportError("No module named 'ray'")):
-                result = is_ray_initialized()
+        with patch.dict('sys.modules', {'ray': None}), \
+             patch('builtins.__import__',
+                   side_effect=ImportError("No module named 'ray'")):
+            result = is_ray_initialized()
 
         # Restore original ray module if it existed
         if original_ray is not None:
@@ -79,7 +79,7 @@ class TestIsRayInitialized:
         """Test when ray.is_initialized() raises an exception."""
         mock_ray.is_initialized.side_effect = RuntimeError("Ray error")
 
-        # The function should catch ImportError only, so RuntimeError should propagate
+        # Only ImportError is caught, so RuntimeError propagates.
         with pytest.raises(RuntimeError, match="Ray error"):
             is_ray_initialized()
 
@@ -167,9 +167,10 @@ class TestIsInRayActor:
             del sys.modules['ray']
 
         # Mock the import to raise ImportError
-        with patch.dict('sys.modules', {'ray': None}):
-            with patch('builtins.__import__', side_effect=ImportError("No module named 'ray'")):
-                result = is_in_ray_actor()
+        with patch.dict('sys.modules', {'ray': None}), \
+             patch('builtins.__import__',
+                   side_effect=ImportError("No module named 'ray'")):
+            result = is_in_ray_actor()
 
         # Restore original ray module if it existed
         if original_ray is not None:
@@ -181,9 +182,10 @@ class TestIsInRayActor:
     def test_in_ray_actor_runtime_context_exception(self, mock_ray):
         """Test when get_runtime_context() raises an exception."""
         mock_ray.is_initialized.return_value = True
-        mock_ray.get_runtime_context.side_effect = RuntimeError("Runtime context error")
+        mock_ray.get_runtime_context.side_effect = RuntimeError(
+            "Runtime context error")
 
-        # The function should catch ImportError only, so RuntimeError should propagate
+        # Only ImportError is caught, so RuntimeError propagates.
         with pytest.raises(RuntimeError, match="Runtime context error"):
             is_in_ray_actor()
 
@@ -192,19 +194,21 @@ class TestIsInRayActor:
         """Test when get_actor_id() raises an exception."""
         mock_ray.is_initialized.return_value = True
         mock_runtime_context = MagicMock()
-        mock_runtime_context.get_actor_id.side_effect = RuntimeError("Actor ID error")
+        mock_runtime_context.get_actor_id.side_effect = RuntimeError(
+            "Actor ID error")
         mock_ray.get_runtime_context.return_value = mock_runtime_context
 
-        # The function should catch ImportError only, so RuntimeError should propagate
+        # Only ImportError is caught, so RuntimeError propagates.
         with pytest.raises(RuntimeError, match="Actor ID error"):
             is_in_ray_actor()
 
     @patch('vllm.ray.lazy_utils.ray')
     def test_in_ray_actor_is_initialized_exception(self, mock_ray):
         """Test when is_initialized() raises an exception."""
-        mock_ray.is_initialized.side_effect = RuntimeError("Initialization check error")
+        mock_ray.is_initialized.side_effect = RuntimeError(
+            "Initialization check error")
 
-        # The function should catch ImportError only, so RuntimeError should propagate
+        # Only ImportError is caught, so RuntimeError propagates.
         with pytest.raises(RuntimeError, match="Initialization check error"):
             is_in_ray_actor()
 
@@ -291,7 +295,8 @@ class TestIntegrationScenarios:
     def test_both_functions_ray_not_available(self, mock_ray):
         """Test both functions when Ray import fails."""
         # Simulate ImportError for both functions
-        with patch('vllm.ray.lazy_utils.ray', side_effect=ImportError("No module named 'ray'")):
+        with patch('vllm.ray.lazy_utils.ray',
+                   side_effect=ImportError("No module named 'ray'")):
             result1 = is_ray_initialized()
             result2 = is_in_ray_actor()
 
@@ -352,12 +357,14 @@ class TestEdgeCasesAndCornerCases:
         ]
 
         for error_msg in error_messages:
-            with patch('vllm.ray.lazy_utils.ray', side_effect=ImportError(error_msg)):
+            with patch('vllm.ray.lazy_utils.ray',
+                       side_effect=ImportError(error_msg)):
                 result1 = is_ray_initialized()
                 result2 = is_in_ray_actor()
 
-                assert result1 is False, f"Failed for error message: '{error_msg}'"
-                assert result2 is False, f"Failed for error message: '{error_msg}'"
+                msg = f"Failed for error message: '{error_msg}'"
+                assert result1 is False, msg
+                assert result2 is False, msg
 
     @patch('vllm.ray.lazy_utils.ray')
     def test_ray_module_partially_available(self, mock_ray):
@@ -398,7 +405,8 @@ class TestEdgeCasesAndCornerCases:
         def call_functions():
             # Simulate some delay
             time.sleep(0.01)
-            with patch('vllm.ray.lazy_utils.ray', side_effect=ImportError("No module")):
+            with patch('vllm.ray.lazy_utils.ray',
+                       side_effect=ImportError("No module")):
                 result1 = is_ray_initialized()
                 result2 = is_in_ray_actor()
                 results.append((result1, result2))
@@ -450,4 +458,5 @@ class TestEdgeCasesAndCornerCases:
         # might hold references, but this tests that our function doesn't
         # create circular references
         # Note: This is more of a demonstration of testing memory behavior
-        assert weak_ref() is not None or weak_ref() is None  # Either is acceptable
+        assert weak_ref(
+        ) is not None or weak_ref() is None  # Either is acceptable
