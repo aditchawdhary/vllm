@@ -10,8 +10,8 @@ import os
 import subprocess
 import sys
 
-from vllm.model_executor.layers.batch_invariant import \
-    vllm_kernel_override_batch_invariant
+from vllm.model_executor.layers.batch_invariant import (
+    vllm_kernel_override_batch_invariant)
 
 
 def demonstrate_function():
@@ -42,7 +42,8 @@ def demonstrate_function():
         try:
             result = vllm_kernel_override_batch_invariant()
             env_display = f"'{value}'" if value is not None else "unset"
-            print(f"VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT={env_display:>8} -> {result} ({description})")
+            print(f"VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT={env_display:>8}"
+                  f" -> {result} ({description})")
         finally:
             # Clean up
             if "VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT" in os.environ:
@@ -53,12 +54,14 @@ def run_tests():
     """Run the pytest tests."""
     print("\n=== Running Unit Tests ===\n")
 
-    test_file = os.path.join(os.path.dirname(__file__), "test_batch_invariant.py")
+    test_file = os.path.join(os.path.dirname(__file__),
+                             "test_batch_invariant.py")
 
     try:
-        result = subprocess.run([
-            sys.executable, "-m", "pytest", test_file, "-v", "--tb=short"
-        ], capture_output=True, text=True)
+        result = subprocess.run(
+            [sys.executable, "-m", "pytest", test_file, "-v", "--tb=short"],
+            capture_output=True,
+            text=True)
 
         print("STDOUT:")
         print(result.stdout)
