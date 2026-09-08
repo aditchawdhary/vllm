@@ -619,6 +619,10 @@ def cutlass_scaled_mm_supports_block_fp8(cuda_device_capability: int) -> bool:
         cuda_device_capability)
 
 
+def get_sm_version_num() -> int:
+    return torch.ops._C.get_sm_version_num()
+
+
 def cutlass_scaled_mm(a: torch.Tensor,
                       b: torch.Tensor,
                       scale_a: torch.Tensor,
@@ -886,7 +890,7 @@ def get_cutlass_pplx_moe_mm_data(expert_offsets: torch.Tensor,
     used in CUTLASS-based fused MoE.
 
     The function takes in expert_num_tokens (token count per expert) and
-    non_zero_expert_idxs (consecutive indices of experts with non-zero token 
+    non_zero_expert_idxs (consecutive indices of experts with non-zero token
     counts) and uses them to compute:
     - expert_offsets: Indices that mark at which token index each expert begins
                       its computation.
@@ -2019,7 +2023,7 @@ def hadacore_transform(x: torch.Tensor, inplace: bool = True) -> torch.Tensor:
 
     Note that sylvester hadamard transforms are also symmetric, which means that
     this function is also applies the (transpose <=> inverse) transform.
-    
+
     :param x: value to be transformed inplace
     :param inplace: modify value in place
     :return: value after transformation
