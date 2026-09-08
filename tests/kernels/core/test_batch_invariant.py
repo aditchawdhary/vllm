@@ -14,10 +14,10 @@ import os
 import threading
 import time
 
-from vllm.model_executor.layers.batch_invariant import \
-    vllm_kernel_override_batch_invariant
-
 import pytest
+
+from vllm.model_executor.layers.batch_invariant import (
+    vllm_kernel_override_batch_invariant)
 
 
 def test_vllm_kernel_override_batch_invariant_default():
@@ -53,7 +53,9 @@ def test_vllm_kernel_override_batch_invariant_one():
 
 
 def test_vllm_kernel_override_batch_invariant_positive_number():
-    """Test that the function returns True when env var is set to positive number."""
+    """
+    Test that the function returns True when env var is set to positive number.
+    """
     os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"] = "42"
 
     try:
@@ -64,7 +66,9 @@ def test_vllm_kernel_override_batch_invariant_positive_number():
 
 
 def test_vllm_kernel_override_batch_invariant_negative_number():
-    """Test that the function returns True when env var is set to negative number."""
+    """
+    Test that the function returns True when env var is set to negative number.
+    """
     os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"] = "-1"
 
     try:
@@ -75,7 +79,9 @@ def test_vllm_kernel_override_batch_invariant_negative_number():
 
 
 def test_vllm_kernel_override_batch_invariant_empty_string():
-    """Test that the function returns False when env var is set to empty string."""
+    """
+    Test that the function returns False when env var is set to empty string.
+    """
     os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"] = ""
 
     try:
@@ -86,7 +92,10 @@ def test_vllm_kernel_override_batch_invariant_empty_string():
 
 
 def test_vllm_kernel_override_batch_invariant_non_numeric():
-    """Test that the function returns False when env var is set to non-numeric string."""
+    """
+    Test that the function returns False when env var is set to non-numeric
+    string.
+    """
     test_values = ["abc", "true", "false", "yes", "no", "on", "off"]
 
     for value in test_values:
@@ -94,7 +103,8 @@ def test_vllm_kernel_override_batch_invariant_non_numeric():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert result is False, f"Expected False for value '{value}', got {result}"
+            msg = f"Expected False for value '{value}', got {result}"
+            assert result is False, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
@@ -109,7 +119,8 @@ def test_vllm_kernel_override_batch_invariant_whitespace():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert result is expected, f"Expected {expected} for value '{value}', got {result}"
+            msg = f"Expected {expected} for value '{value}', got {result}"
+            assert result is expected, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
@@ -124,7 +135,8 @@ def test_vllm_kernel_override_batch_invariant_mixed_numeric():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert result is expected, f"Expected {expected} for value '{value}', got {result}"
+            msg = f"Expected {expected} for value '{value}', got {result}"
+            assert result is expected, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
@@ -139,25 +151,29 @@ def test_vllm_kernel_override_batch_invariant_large_numbers():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert result is expected, f"Expected {expected} for value '{value}', got {result}"
+            msg = f"Expected {expected} for value '{value}', got {result}"
+            assert result is expected, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
 
-@pytest.mark.parametrize("env_value,expected", [
-    (None, False),  # Environment variable not set
-    ("", False),    # Empty string
-    ("0", False),   # Zero
-    ("1", True),    # One
-    ("42", True),   # Positive number
-    ("-1", True),   # Negative number
-    ("abc", False), # Non-numeric string
-    ("1.0", True),  # Float that converts to 1
-    ("0.0", False), # Float that converts to 0
-    (" 1 ", True),  # Whitespace around 1
-    (" 0 ", False), # Whitespace around 0
-])
-def test_vllm_kernel_override_batch_invariant_parametrized(env_value, expected):
+@pytest.mark.parametrize(
+    "env_value,expected",
+    [
+        (None, False),  # Environment variable not set
+        ("", False),  # Empty string
+        ("0", False),  # Zero
+        ("1", True),  # One
+        ("42", True),  # Positive number
+        ("-1", True),  # Negative number
+        ("abc", False),  # Non-numeric string
+        ("1.0", True),  # Float that converts to 1
+        ("0.0", False),  # Float that converts to 0
+        (" 1 ", True),  # Whitespace around 1
+        (" 0 ", False),  # Whitespace around 0
+    ])
+def test_vllm_kernel_override_batch_invariant_parametrized(
+        env_value, expected):
     """Parametrized test for various environment variable values."""
     # Clean up environment
     if "VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT" in os.environ:
@@ -169,7 +185,8 @@ def test_vllm_kernel_override_batch_invariant_parametrized(env_value, expected):
 
     try:
         result = vllm_kernel_override_batch_invariant()
-        assert result is expected, f"Expected {expected} for env_value '{env_value}', got {result}"
+        msg = f"Expected {expected} for env_value '{env_value}', got {result}"
+        assert result is expected, msg
     finally:
         # Clean up
         if "VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT" in os.environ:
@@ -184,7 +201,8 @@ def test_vllm_kernel_override_batch_invariant_thread_safety():
     def worker(env_value, expected):
         try:
             os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"] = env_value
-            time.sleep(0.01)  # Small delay to increase chance of race conditions
+            time.sleep(
+                0.01)  # Small delay to increase chance of race conditions
             result = vllm_kernel_override_batch_invariant()
             results.append((env_value, result, expected))
         except Exception as e:
@@ -214,22 +232,23 @@ def test_vllm_kernel_override_batch_invariant_thread_safety():
 
     # Verify results (note: due to environment variable sharing,
     # we can't guarantee exact results, but we can check no crashes occurred)
-    assert len(results) == len(threads), "Not all threads completed successfully"
+    assert len(results) == len(
+        threads), "Not all threads completed successfully"
 
 
 def test_vllm_kernel_override_batch_invariant_edge_cases():
     """Test edge cases and corner cases."""
     edge_cases = [
-        ("00", False),      # Leading zero
-        ("01", True),       # Leading zero with non-zero
-        ("+1", True),       # Positive sign
-        ("+0", False),      # Positive sign with zero
-        ("1e0", True),      # Scientific notation
-        ("0e0", False),     # Scientific notation zero
-        ("inf", False),     # Infinity string
-        ("nan", False),     # NaN string
-        ("0x1", False),     # Hexadecimal (should be treated as non-numeric)
-        ("0b1", False),     # Binary (should be treated as non-numeric)
+        ("00", False),  # Leading zero
+        ("01", True),  # Leading zero with non-zero
+        ("+1", True),  # Positive sign
+        ("+0", False),  # Positive sign with zero
+        ("1e0", True),  # Scientific notation
+        ("0e0", False),  # Scientific notation zero
+        ("inf", False),  # Infinity string
+        ("nan", False),  # NaN string
+        ("0x1", False),  # Hexadecimal (should be treated as non-numeric)
+        ("0b1", False),  # Binary (should be treated as non-numeric)
     ]
 
     for value, expected in edge_cases:
@@ -237,7 +256,8 @@ def test_vllm_kernel_override_batch_invariant_edge_cases():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert result is expected, f"Expected {expected} for value '{value}', got {result}"
+            msg = f"Expected {expected} for value '{value}', got {result}"
+            assert result is expected, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
@@ -246,24 +266,27 @@ def test_vllm_kernel_override_batch_invariant_c_atoi_behavior():
     """Test that the function behaves like C's atoi function."""
     # Test cases that specifically test atoi behavior
     atoi_test_cases = [
-        ("123", True),      # Simple positive number
-        ("-123", True),     # Simple negative number
-        ("0", False),       # Zero
-        ("000", False),     # Multiple zeros
-        ("123abc", True),   # Number followed by non-digits (atoi stops at first non-digit)
+        ("123", True),  # Simple positive number
+        ("-123", True),  # Simple negative number
+        ("0", False),  # Zero
+        ("000", False),  # Multiple zeros
+        ("123abc", True
+         ),  # Number followed by non-digits (atoi stops at first non-digit)
         ("abc123", False),  # Non-digits followed by number (atoi returns 0)
-        ("  123", True),    # Leading whitespace (atoi skips whitespace)
-        ("  -123", True),   # Leading whitespace with negative
-        ("  0", False),     # Leading whitespace with zero
-        ("123  ", True),    # Trailing whitespace (atoi stops at first non-digit)
-        ("+123", True),     # Explicit positive sign
-        ("+-123", False),   # Invalid sign combination (atoi returns 0)
-        ("", False),        # Empty string (atoi returns 0)
-        ("   ", False),     # Only whitespace (atoi returns 0)
-        ("2147483647", True),   # INT_MAX
+        ("  123", True),  # Leading whitespace (atoi skips whitespace)
+        ("  -123", True),  # Leading whitespace with negative
+        ("  0", False),  # Leading whitespace with zero
+        ("123  ", True),  # Trailing whitespace (atoi stops at first non-digit)
+        ("+123", True),  # Explicit positive sign
+        ("+-123", False),  # Invalid sign combination (atoi returns 0)
+        ("", False),  # Empty string (atoi returns 0)
+        ("   ", False),  # Only whitespace (atoi returns 0)
+        ("2147483647", True),  # INT_MAX
         ("-2147483648", True),  # INT_MIN
-        ("2147483648", True),   # Overflow (behavior may vary, but should be non-zero)
-        ("-2147483649", True),  # Underflow (behavior may vary, but should be non-zero)
+        ("2147483648",
+         True),  # Overflow (behavior may vary, but should be non-zero)
+        ("-2147483649",
+         True),  # Underflow (behavior may vary, but should be non-zero)
     ]
 
     for value, expected in atoi_test_cases:
@@ -271,7 +294,8 @@ def test_vllm_kernel_override_batch_invariant_c_atoi_behavior():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert result is expected, f"Expected {expected} for value '{value}', got {result}"
+            msg = f"Expected {expected} for value '{value}', got {result}"
+            assert result is expected, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
@@ -292,8 +316,12 @@ def test_vllm_kernel_override_batch_invariant_return_type():
 
         try:
             result = vllm_kernel_override_batch_invariant()
-            assert isinstance(result, bool), f"Expected bool, got {type(result)} for value '{value}'"
-            assert result in [True, False], f"Expected True or False, got {result} for value '{value}'"
+            assert isinstance(
+                result,
+                bool), f"Expected bool, got {type(result)} for value '{value}'"
+            assert result in [
+                True, False
+            ], f"Expected True or False, got {result} for value '{value}'"
         finally:
             # Clean up
             if "VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT" in os.environ:
@@ -301,7 +329,10 @@ def test_vllm_kernel_override_batch_invariant_return_type():
 
 
 def test_vllm_kernel_override_batch_invariant_multiple_calls():
-    """Test that multiple calls with the same environment return consistent results."""
+    """
+    Test that multiple calls with the same environment return consistent
+    results.
+    """
     test_values = ["0", "1", "42", "", "abc"]
 
     for value in test_values:
@@ -309,15 +340,16 @@ def test_vllm_kernel_override_batch_invariant_multiple_calls():
 
         try:
             # Call the function multiple times
-            results = [vllm_kernel_override_batch_invariant() for _ in range(10)]
+            results = [
+                vllm_kernel_override_batch_invariant() for _ in range(10)
+            ]
 
             # All results should be the same
             first_result = results[0]
             for i, result in enumerate(results[1:], 1):
                 assert result == first_result, (
                     f"Inconsistent results for value '{value}': "
-                    f"call 0 returned {first_result}, call {i} returned {result}"
-                )
+                    f"call 0 gave {first_result}, call {i} gave {result}")
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
 
@@ -371,12 +403,15 @@ def test_vllm_kernel_override_batch_invariant_stress_test():
     # Add random strings
     for _ in range(20):
         length = random.randint(1, 10)
-        test_values.append(''.join(random.choices(string.ascii_letters + string.digits, k=length)))
+        test_values.append(''.join(
+            random.choices(string.ascii_letters + string.digits, k=length)))
 
     # Add random mixed strings
     for _ in range(10):
         length = random.randint(1, 10)
-        test_values.append(''.join(random.choices(string.ascii_letters + string.digits + " \t\n", k=length)))
+        test_values.append(''.join(
+            random.choices(string.ascii_letters + string.digits + " \t\n",
+                           k=length)))
 
     for value in test_values:
         os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"] = value
@@ -384,7 +419,9 @@ def test_vllm_kernel_override_batch_invariant_stress_test():
         try:
             result = vllm_kernel_override_batch_invariant()
             # Just ensure it doesn't crash and returns a boolean
-            assert isinstance(result, bool), f"Expected bool for value '{value}', got {type(result)}"
+            assert isinstance(
+                result,
+                bool), f"Expected bool for value '{value}', got {type(result)}"
         except Exception as e:
             pytest.fail(f"Function crashed with value '{value}': {e}")
         finally:
@@ -395,12 +432,12 @@ def test_vllm_kernel_override_batch_invariant_unicode():
     """Test that the function handles unicode strings correctly."""
     unicode_values = [
         "1️⃣",  # Emoji
-        "①",    # Unicode number
-        "一",    # Chinese number
-        "١",    # Arabic number
-        "Ⅰ",    # Roman numeral
-        "𝟏",    # Mathematical bold digit
-        "🔢",   # Number emoji
+        "①",  # Unicode number
+        "一",  # Chinese number
+        "١",  # Arabic number
+        "Ⅰ",  # Roman numeral
+        "𝟏",  # Mathematical bold digit
+        "🔢",  # Number emoji
         "αβγ",  # Greek letters
         "测试",  # Chinese characters
     ]
@@ -411,6 +448,7 @@ def test_vllm_kernel_override_batch_invariant_unicode():
         try:
             result = vllm_kernel_override_batch_invariant()
             # Unicode strings should be treated as non-numeric and return False
-            assert result is False, f"Expected False for unicode value '{value}', got {result}"
+            msg = f"Expected False for unicode value '{value}', got {result}"
+            assert result is False, msg
         finally:
             del os.environ["VLLM_KERNEL_OVERRIDE_BATCH_INVARIANT"]
