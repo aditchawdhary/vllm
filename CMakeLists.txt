@@ -265,6 +265,7 @@ set(VLLM_EXT_SRC
   "csrc/cuda_utils_kernels.cu"
   "csrc/custom_all_reduce.cu"
   "csrc/torch_bindings.cpp")
+  "csrc/core/batch_invariant_ops.cpp")
 
 if(VLLM_GPU_LANG STREQUAL "CUDA")
   SET(CUTLASS_ENABLE_HEADERS_ONLY ON CACHE BOOL "Enable only the header library")
