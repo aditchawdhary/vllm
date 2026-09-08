@@ -3,14 +3,14 @@
 
 from unittest.mock import MagicMock, patch
 
-import torch
-from vllm.platforms import current_platform
-
 import pytest
+import torch
+
+from vllm.platforms import current_platform
 
 
 class TestGetSmVersionNum:
-    """Test suite for the get_sm_version_num function from cutlass_extensions/common.cpp"""
+    """Tests for get_sm_version_num in cutlass_extensions/common.cpp."""
 
     @pytest.mark.skipif(not current_platform.is_cuda(),
                         reason="CUDA not available")
@@ -32,8 +32,6 @@ class TestGetSmVersionNum:
         # SM 9.0 (Hopper) -> 90
         # SM 10.0 (Blackwell) -> 100
         # SM 12.0 (future) -> 120
-        valid_versions = [75, 80, 86, 89, 90, 100, 120]
-
         # Version should be one of the known versions or at least >= 75
         # (we support Turing and newer)
         assert version >= 75, f"SM version {version} is too old (< 7.5)"
@@ -107,12 +105,13 @@ class TestGetSmVersionNum:
             # If the function is available, it might return 0 or raise an error
             # This depends on the implementation
             version = get_sm_version_num()
-            # If it returns a value, it should be 0 or negative to indicate no CUDA
+            # A returned value should be 0 or negative to indicate no CUDA
             assert version <= 0, \
                 "On non-CUDA platforms, version should be 0 or negative"
         except (ImportError, AttributeError, RuntimeError):
-            # It's acceptable if the function is not available on non-CUDA platforms
-            pytest.skip("get_sm_version_num not available on non-CUDA platform")
+            # The function may be unavailable on non-CUDA platforms
+            pytest.skip(
+                "get_sm_version_num not available on non-CUDA platform")
 
     def test_get_sm_version_num_mock_cuda_calls(self):
         """Test get_sm_version_num with mocked CUDA calls."""
@@ -133,8 +132,8 @@ class TestGetSmVersionNum:
 
             mock_cuda.cudaDeviceGetAttribute = mock_get_attribute_80
 
-            # Import and test (this would require the actual C++ function to be mockable)
-            # Since we can't easily mock the C++ function, we'll test the expected behavior
+            # Testing the real call would need the C++ function to be mockable
+            # It is not, so assert the expected behaviour instead
             expected_version_80 = 8 * 10 + 0  # 80
             assert expected_version_80 == 80
 
@@ -166,19 +165,20 @@ class TestGetSmVersionNum:
         """Test the version calculation logic (major * 10 + minor)."""
         # Test various combinations
         test_cases = [
-            (7, 5, 75),   # Turing
-            (8, 0, 80),   # Ampere
-            (8, 6, 86),   # Ampere
-            (8, 9, 89),   # Ada Lovelace
-            (9, 0, 90),   # Hopper
-            (10, 0, 100), # Blackwell
-            (12, 0, 120), # Future
+            (7, 5, 75),  # Turing
+            (8, 0, 80),  # Ampere
+            (8, 6, 86),  # Ampere
+            (8, 9, 89),  # Ada Lovelace
+            (9, 0, 90),  # Hopper
+            (10, 0, 100),  # Blackwell
+            (12, 0, 120),  # Future
         ]
 
         for major, minor, expected in test_cases:
             calculated = major * 10 + minor
-            assert calculated == expected, \
-                f"Version calculation failed: {major}.{minor} -> {calculated} != {expected}"
+            assert calculated == expected, (
+                f"Version calc failed: {major}.{minor} -> "
+                f"{calculated} != {expected}")
 
     @pytest.mark.skipif(not current_platform.is_cuda(),
                         reason="CUDA not available")
@@ -191,7 +191,7 @@ class TestGetSmVersionNum:
 
         # All versions should be the same
         assert all(v == versions[0] for v in versions), \
-            "get_sm_version_num should return consistent results across multiple calls"
+            "get_sm_version_num should be consistent across calls"
 
         # The function should work in different contexts
         version_in_loop = None
@@ -242,7 +242,7 @@ class TestGetSmVersionNumIndirect:
     @pytest.mark.skipif(not current_platform.is_cuda(),
                         reason="CUDA not available")
     def test_cutlass_scaled_mm_supports_fp8_uses_sm_version(self):
-        """Test that cutlass_scaled_mm_supports_fp8 uses SM version correctly."""
+        """Test cutlass_scaled_mm_supports_fp8 uses SM version correctly."""
         from vllm._custom_ops import (cutlass_scaled_mm_supports_fp8,
                                       get_sm_version_num)
 
@@ -319,13 +319,13 @@ class TestGetSmVersionNumIndirect:
 
         # Test boundary conditions
         boundary_tests = [
-            (0, False),    # Invalid version
-            (74, False),   # Below minimum
-            (75, None),    # Turing - depends on implementation
-            (89, None),    # Ada Lovelace - depends on implementation
-            (90, None),    # Hopper - likely supports FP8
-            (100, None),   # Blackwell - likely supports FP8
-            (999, None),   # Future version
+            (0, False),  # Invalid version
+            (74, False),  # Below minimum
+            (75, None),  # Turing - depends on implementation
+            (89, None),  # Ada Lovelace - depends on implementation
+            (90, None),  # Hopper - likely supports FP8
+            (100, None),  # Blackwell - likely supports FP8
+            (999, None),  # Future version
         ]
 
         for version, expected in boundary_tests:
@@ -359,9 +359,7 @@ class TestGetSmVersionNumIndirect:
     def test_sm_version_mathematical_properties(self):
         """Test mathematical properties of SM version calculation."""
         # Test that the version calculation preserves information
-        test_cases = [
-            (7, 5), (8, 0), (8, 6), (8, 9), (9, 0), (10, 0), (12, 0)
-        ]
+        test_cases = [(7, 5), (8, 0), (8, 6), (8, 9), (9, 0), (10, 0), (12, 0)]
 
         for major, minor in test_cases:
             version = major * 10 + minor
@@ -370,10 +368,12 @@ class TestGetSmVersionNumIndirect:
             extracted_major = version // 10
             extracted_minor = version % 10
 
-            assert extracted_major == major, \
-                f"Major extraction failed: {version} -> {extracted_major} != {major}"
-            assert extracted_minor == minor, \
-                f"Minor extraction failed: {version} -> {extracted_minor} != {minor}"
+            assert extracted_major == major, (
+                f"Major extraction failed: {version} -> "
+                f"{extracted_major} != {major}")
+            assert extracted_minor == minor, (
+                f"Minor extraction failed: {version} -> "
+                f"{extracted_minor} != {minor}")
 
             # Version should be in reasonable range
             assert 70 <= version <= 200, \
