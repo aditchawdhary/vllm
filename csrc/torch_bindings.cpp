@@ -775,6 +775,7 @@ TORCH_LIBRARY_EXPAND(CONCAT(TORCH_EXTENSION_NAME, _custom_ar), custom_ar) {
 
 TORCH_LIBRARY_EXPAND(CONCAT(TORCH_EXTENSION_NAME, _core_ops), core_ops) {
   core_ops.def("vllm_kernel_override_batch_invariant() -> bool");
-  core_ops.impl("vllm_kernel_override_batch_invariant", &vllm_kernel_override_batch_invariant_cpp);
+  core_ops.impl("vllm_kernel_override_batch_invariant",
+                &vllm_kernel_override_batch_invariant_cpp);
 }
 REGISTER_EXTENSION(TORCH_EXTENSION_NAME)
