@@ -62,6 +62,7 @@ pytest tests/kernels/core/test_batch_invariant.py -v
 ## Notes
 
 The C++ function uses `std::atoi()` for string-to-integer conversion, which:
+
 - Skips leading whitespace
 - Stops at the first non-digit character
 - Returns 0 for invalid input
