@@ -14,8 +14,8 @@ import pytest
 def test_batch_invariant_import():
     """Test that we can import the function."""
     try:
-        from vllm.model_executor.layers.batch_invariant import \
-            vllm_kernel_override_batch_invariant
+        from vllm.model_executor.layers.batch_invariant import (
+            vllm_kernel_override_batch_invariant)
         assert callable(vllm_kernel_override_batch_invariant)
     except ImportError:
         pytest.skip("vllm.model_executor.layers.batch_invariant not available")
@@ -24,8 +24,8 @@ def test_batch_invariant_import():
 def test_batch_invariant_basic():
     """Basic test of the batch invariant function."""
     try:
-        from vllm.model_executor.layers.batch_invariant import \
-            vllm_kernel_override_batch_invariant
+        from vllm.model_executor.layers.batch_invariant import (
+            vllm_kernel_override_batch_invariant)
     except ImportError:
         pytest.skip("vllm.model_executor.layers.batch_invariant not available")
 
