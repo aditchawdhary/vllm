@@ -368,4 +368,3 @@ int64_t qr_max_size();
 #endif
 // Batch invariant utilities
 bool vllm_kernel_override_batch_invariant_cpp();
-
